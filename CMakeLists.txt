@@ -6,6 +6,8 @@ set (JAVA_HOME $ENV{JAVA_HOME} CACHE PATH "Home directory of Java Divelooment To
 
 link_directories(${PROJECT_SOURCE_DIR}/lib)
 
+add_subdirectory(src lib)
+
 add_subdirectory(jni lib/jni)
 
 set(TEST_VIDEO_PATH CACHE FILEPATH "File path of image for test.")
