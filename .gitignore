@@ -31,3 +31,11 @@
 # CLion project files
 .idea/
 cmake-build-debug/
+
+# CMake intermediate files
+CMakeCache.txt
+CMakeFiles/
+Makefile
+bin/
+cmake_install.cmake
+lib/

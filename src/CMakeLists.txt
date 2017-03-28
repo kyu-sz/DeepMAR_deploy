@@ -1,15 +1,35 @@
-add_library(DeepMAR_deploy SHARED attributes_recognizer.cpp)
+add_library(DeepMAR SHARED DeepMAR.cpp)
 
-set (CMAKE_C_CFLAGS "${CMAKE_C_CFLAGS} -fPIC")
-set (CMAKE_CXX_CFLAGS "${CMAKE_CXX_CFLAGS} -fPIC")
+set(CMAKE_C_CFLAGS "${CMAKE_C_CFLAGS} -fPIC")
+set(CMAKE_CXX_CFLAGS "${CMAKE_CXX_CFLAGS} -fPIC")
 
-include_directories (DeepMAR_deploy PUBLIC ${PROJECT_SOURCE_DIR}/include)
-include_directories (DeepMAR_deploy PUBLIC ${JAVA_HOME}/include)
-
-if (MSVC)
-    include_directories (DeepMAR_deploy PUBLIC ${JAVA_HOME}/include/windows)
-else ()
-    include_directories (DeepMAR_deploy PUBLIC ${JAVA_HOME}/include/linux)
+if (CPU_ONLY)
+    add_definitions(-DCPU_ONLY)
 endif ()
 
-install (TARGETS DeepMAR_deploy DESTINATION lib)
+execute_process(
+        WORKING_DIRECTORY ${CAFFE_HOME}
+        COMMAND protoc src/caffe/proto/caffe.proto --cpp_out=.
+)
+execute_process(
+        COMMAND mkdir -p ${CAFFE_HOME}/include/caffe/proto
+)
+execute_process(
+        WORKING_DIRECTORY ${CAFFE_HOME}
+        COMMAND cp src/caffe/proto/caffe.pb.h include/caffe/proto
+)
+
+include_directories(DeepMAR PUBLIC ${PROJECT_SOURCE_DIR}/include)
+include_directories(DeepMAR PUBLIC ${JAVA_HOME}/include)
+include_directories(DeepMAR PUBLIC ${CAFFE_HOME}/include)
+
+if (MSVC)
+    include_directories(DeepMAR PUBLIC ${JAVA_HOME}/include/windows)
+else ()
+    include_directories(DeepMAR PUBLIC ${JAVA_HOME}/include/linux)
+endif ()
+
+find_library(CAFFE_LIB caffe HINTS ${CAFFE_HOME}/.build_release/lib)
+target_link_libraries(DeepMAR PUBLIC ${CAFFE_LIB})
+
+install(TARGETS DeepMAR DESTINATION lib)

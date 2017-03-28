@@ -2,3 +2,88 @@
 // Created by ken.yu on 17-3-27.
 //
 
+#include <iostream>
+#include <getopt.h>
+#include <opencv2/opencv.hpp>
+#include <omp.h>
+#include "DeepMAR.h"
+
+using namespace cripac;
+using namespace std;
+using namespace cv;
+
+int main(int argc, char **argv) {
+  int gpuID = -1;
+  char *proto_path = NULL;
+  char *model_path = NULL;
+  char *img_path = NULL;
+
+  int opt;
+
+  while ((opt = getopt(argc, argv, "g:p:m:i:")) != -1)
+    switch (opt) {
+      case 'g':gpuID = atoi(optarg);
+        break;
+      case 'p':proto_path = optarg;
+        break;
+      case 'm':model_path = optarg;
+        break;
+      case 'i':img_path = optarg;
+        break;
+      case '?':
+        switch (optopt) {
+          case 'g':
+          case 'p':
+          case 'm':
+          case 'i':fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+            break;
+          default:
+            if (isprint(optopt))
+              fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+            else
+              fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+            break;
+        }
+      default:abort();
+    }
+
+  DeepMAR *recognizer = new DeepMAR();
+  recognizer->initialize(proto_path,
+                         model_path,
+                         gpuID);
+  cout << "Initialized!" << endl;
+
+  const int INPUT_SIZE = 227;
+
+  Mat img = imread(img_path);
+  resize(img, img, Size(INPUT_SIZE, INPUT_SIZE));
+  img.convertTo(img, CV_32FC3);
+
+  cout << img.data[0] << endl;
+
+  Mat channels[3];
+  split(img, channels);
+  float input[INPUT_SIZE * INPUT_SIZE * 3];
+  for (int i = 0; i < 3; ++i)
+    memmove(input + i * INPUT_SIZE * INPUT_SIZE, channels[i].data, sizeof(float) * INPUT_SIZE * INPUT_SIZE);
+#pragma omp parallel for
+  for (int i = 0; i < INPUT_SIZE * INPUT_SIZE * 3; ++i)
+    input[i] = (input[i] - 127) / 256.f;
+
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < INPUT_SIZE; ++j) {
+      for (int k = 0; k < INPUT_SIZE; ++k)
+        cout << input[i * INPUT_SIZE * INPUT_SIZE + j * INPUT_SIZE + k] << ' ';
+      cout << endl;
+    }
+    cout << endl;
+  }
+
+  float fc8[1024];
+  recognizer->recognize(input, fc8);
+  for (int i = 0; i < 1024; ++i)
+    cout << fc8[i] << ' ';
+  cout << endl;
+
+  return 0;
+}
