@@ -5,8 +5,7 @@
 #include <iostream>
 #include <getopt.h>
 #include <opencv2/opencv.hpp>
-#include <omp.h>
-#include "DeepMAR.h"
+#include <DeepMAR.hpp>
 
 using namespace cripac;
 using namespace std;
@@ -51,7 +50,6 @@ int main(int argc, char **argv) {
   recognizer->initialize(proto_path,
                          model_path,
                          gpuID);
-  cout << "Initialized!" << endl;
 
   const int INPUT_SIZE = 227;
 
@@ -59,25 +57,15 @@ int main(int argc, char **argv) {
   resize(img, img, Size(INPUT_SIZE, INPUT_SIZE));
   img.convertTo(img, CV_32FC3);
 
-  cout << img.data[0] << endl;
-
   Mat channels[3];
   split(img, channels);
   float input[INPUT_SIZE * INPUT_SIZE * 3];
   for (int i = 0; i < 3; ++i)
     memmove(input + i * INPUT_SIZE * INPUT_SIZE, channels[i].data, sizeof(float) * INPUT_SIZE * INPUT_SIZE);
+
 #pragma omp parallel for
   for (int i = 0; i < INPUT_SIZE * INPUT_SIZE * 3; ++i)
-    input[i] = (input[i] - 127) / 256.f;
-
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < INPUT_SIZE; ++j) {
-      for (int k = 0; k < INPUT_SIZE; ++k)
-        cout << input[i * INPUT_SIZE * INPUT_SIZE + j * INPUT_SIZE + k] << ' ';
-      cout << endl;
-    }
-    cout << endl;
-  }
+    input[i] = (input[i] - 128) / 256.f;
 
   float fc8[1024];
   recognizer->recognize(input, fc8);

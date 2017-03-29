@@ -2,7 +2,7 @@
 // Created by ken.yu on 17-3-27.
 //
 
-#include <DeepMAR.h>
+#include <DeepMAR.hpp>
 #include <DeepMAR_caffe_jni.h>
 
 using namespace cripac;

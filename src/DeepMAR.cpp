@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-#include <DeepMAR.h>
+#include <DeepMAR.hpp>
 #include <caffe/caffe.hpp>
 
 using namespace std;
@@ -28,14 +28,14 @@ int DeepMAR::initialize(const char *proto_path,
                         const char *model_path,
                         int gpu_index) {
   // Check input.
-  if (proto_path == NULL) {
-    fprintf(stderr, "Error: protocol buffer path is NULL in file %s, line %d\n",
+  if (proto_path == nullptr) {
+    fprintf(stderr, "Error: protocol buffer path at nullptr in file %s, line %d\n",
             __FILE__, __LINE__);
     return DEEPMAR_FILE_NOT_FOUND;
   }
   // model_path input.
-  if (model_path == NULL) {
-    fprintf(stderr, "Error: Caffe model path is NULL in file %s, line %d\n",
+  if (model_path == nullptr) {
+    fprintf(stderr, "Error: Caffe model path at nullptr in file %s, line %d\n",
             __FILE__, __LINE__);
     return DEEPMAR_FILE_NOT_FOUND;
   }
@@ -62,29 +62,28 @@ int DeepMAR::initialize(const char *proto_path,
 }
 
 // Fetch the data of fc8.
-int DeepMAR::recognize(const float *data,
+int DeepMAR::recognize(const float *input,
                        float *fc8) {
   // Check input.
-  if (data == NULL) {
-    fprintf(stderr, "Error: input data is NULL in file %s, line %d\n",
-            __FILE__, __LINE__);
+  if (input == nullptr) {
+    fprintf(stderr, "Error: input is nullptr at file %s, line %d\n", __FILE__, __LINE__);
     return DEEPMAR_EMPTY_INPUT;
   }
 
   const int kInputHeight = 227;
   const int kInputWidth = 227;
 
-  // Put the data into data blob.
+  // Put the input into input blob.
   Blob<float> *input_layer = net->input_blobs()[0];
   input_layer->Reshape(1, 3, kInputHeight, kInputWidth);
   float *input_data = input_layer->mutable_cpu_data();
-  memcpy(input_data, data, sizeof(float) * input_layer->count());
+  memcpy(input_data, input, sizeof(float) * input_layer->count());
 
   net->Forward();
 
-  // Get data.
+  // Get input.
   boost::shared_ptr<Blob<float>> output_blob = net->blob_by_name("fc8");
-  memcpy(fc8, output_blob->cpu_data(), output_blob->count());
+  memcpy(fc8, output_blob->cpu_data(), output_blob->count() * sizeof(float));
 
   return DEEPMAR_OK;
 }
