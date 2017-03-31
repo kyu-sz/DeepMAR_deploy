@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-#include <DeepMAR.hpp>
+#include <DeepMARCaffe.hpp>
 #include <caffe/caffe.hpp>
 
 using namespace std;

@@ -1,4 +1,4 @@
-add_library(DeepMAR SHARED DeepMAR.cpp)
+add_library(DeepMARCaffe SHARED DeepMARCaffe.cpp)
 
 set(CMAKE_C_CFLAGS "${CMAKE_C_CFLAGS} -fPIC")
 set(CMAKE_CXX_CFLAGS "${CMAKE_CXX_CFLAGS} -fPIC")
@@ -19,17 +19,17 @@ execute_process(
         COMMAND cp src/caffe/proto/caffe.pb.h include/caffe/proto
 )
 
-include_directories(DeepMAR PUBLIC ${PROJECT_SOURCE_DIR}/include)
-include_directories(DeepMAR PUBLIC ${JAVA_HOME}/include)
-include_directories(DeepMAR PUBLIC ${CAFFE_HOME}/include)
+include_directories(DeepMARCaffe PUBLIC ${PROJECT_SOURCE_DIR}/include)
+include_directories(DeepMARCaffe PUBLIC ${JAVA_HOME}/include)
+include_directories(DeepMARCaffe PUBLIC ${CAFFE_HOME}/include)
 
 if (MSVC)
-    include_directories(DeepMAR PUBLIC ${JAVA_HOME}/include/windows)
+    include_directories(DeepMARCaffe PUBLIC ${JAVA_HOME}/include/windows)
 else ()
-    include_directories(DeepMAR PUBLIC ${JAVA_HOME}/include/linux)
+    include_directories(DeepMARCaffe PUBLIC ${JAVA_HOME}/include/linux)
 endif ()
 
 find_library(CAFFE_LIB caffe HINTS ${CAFFE_HOME}/.build_release/lib)
-target_link_libraries(DeepMAR PUBLIC ${CAFFE_LIB})
+target_link_libraries(DeepMARCaffe PUBLIC ${CAFFE_LIB})
 
-install(TARGETS DeepMAR DESTINATION lib)
+install(TARGETS DeepMARCaffe DESTINATION lib)

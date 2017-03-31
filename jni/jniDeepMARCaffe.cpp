@@ -2,8 +2,8 @@
 // Created by ken.yu on 17-3-27.
 //
 
-#include <DeepMAR.hpp>
-#include <DeepMAR_caffe_jni.h>
+#include <DeepMARCaffe.hpp>
+#include <jniDeepMARCaffe.h>
 
 using namespace cripac;
 
