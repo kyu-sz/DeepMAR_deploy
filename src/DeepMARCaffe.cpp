@@ -31,12 +31,14 @@ int DeepMAR::initialize(const char *proto_path,
   if (proto_path == nullptr) {
     fprintf(stderr, "Error: protocol buffer path at nullptr in file %s, line %d\n",
             __FILE__, __LINE__);
+    fflush(stdout), fflush(stderr);
     return DEEPMAR_FILE_NOT_FOUND;
   }
   // model_path input.
   if (model_path == nullptr) {
     fprintf(stderr, "Error: Caffe model path at nullptr in file %s, line %d\n",
             __FILE__, __LINE__);
+    fflush(stdout), fflush(stderr);
     return DEEPMAR_FILE_NOT_FOUND;
   }
 
@@ -45,19 +47,25 @@ int DeepMAR::initialize(const char *proto_path,
   // Set mode
   if (gpu_index == kCPUOnly) {
     fprintf(stdout, "Using CPU.\n");
+    fflush(stdout), fflush(stderr);
     Caffe::set_mode(Caffe::CPU);
   } else if (gpu_index >= 0) {
     fprintf(stdout, "Using GPU with device ID %d\n", gpu_index);
+    fflush(stdout), fflush(stderr);
     Caffe::SetDevice(gpu_index);
     Caffe::set_mode(Caffe::GPU);
   }
+  fflush(stdout), fflush(stderr);
 
   // Load the network.
   fprintf(stdout, "Loading protocol from %s.\n", proto_path);
+  fflush(stdout), fflush(stderr);
   net.reset(new Net<float>(proto_path, TEST));
   fprintf(stdout, "Loading caffemodel from %s.\n", model_path);
+  fflush(stdout), fflush(stderr);
   net->CopyTrainedLayersFrom(model_path);
 
+  fflush(stdout), fflush(stderr);
   return DEEPMAR_OK;
 }
 
@@ -67,6 +75,7 @@ int DeepMAR::recognize(const float *input,
   // Check input.
   if (input == nullptr) {
     fprintf(stderr, "Error: input is nullptr at file %s, line %d\n", __FILE__, __LINE__);
+    fflush(stdout), fflush(stderr);
     return DEEPMAR_EMPTY_INPUT;
   }
 
@@ -85,6 +94,7 @@ int DeepMAR::recognize(const float *input,
   boost::shared_ptr<Blob<float>> output_blob = net->blob_by_name("fc8");
   memcpy(fc8, output_blob->cpu_data(), output_blob->count() * sizeof(float));
 
+  fflush(stdout), fflush(stderr);
   return DEEPMAR_OK;
 }
 

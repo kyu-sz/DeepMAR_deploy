@@ -5,7 +5,7 @@
 #include <iostream>
 #include <getopt.h>
 #include <opencv2/opencv.hpp>
-#include <DeepMAR.hpp>
+#include <DeepMARCaffe.hpp>
 
 using namespace cripac;
 using namespace std;

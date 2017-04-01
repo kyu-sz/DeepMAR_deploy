@@ -36,6 +36,7 @@ cmake-build-debug/
 CMakeCache.txt
 CMakeFiles/
 Makefile
-bin/
 cmake_install.cmake
+*.cbp
+bin/
 lib/
