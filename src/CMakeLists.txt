@@ -4,6 +4,7 @@ set(CMAKE_C_CFLAGS "${CMAKE_C_CFLAGS} -fPIC")
 set(CMAKE_CXX_CFLAGS "${CMAKE_CXX_CFLAGS} -fPIC")
 
 if (CPU_ONLY)
+    message(STATUS "Compiling with CPU_ONLY!")
     add_definitions(-DCPU_ONLY)
 endif ()
 
@@ -27,6 +28,13 @@ if (MSVC)
     include_directories(DeepMARCaffe PUBLIC ${JAVA_HOME}/include/windows)
 else ()
     include_directories(DeepMARCaffe PUBLIC ${JAVA_HOME}/include/linux)
+endif ()
+
+set(CUDA_HOME $ENV{CUDA_HOME})
+if (CUDA_HOME)
+    message(STATUS "Using CUDA at ${CUDA_HOME}")
+    include_directories(DeepMARCaffe PUBLIC ${CUDA_HOME}/include)
+    target_link_libraries(DeepMARCaffe PUBLIC ${CUDA_HOME}/lib64)
 endif ()
 
 find_library(CAFFE_LIB caffe HINTS ${CAFFE_HOME}/.build_release/lib)
