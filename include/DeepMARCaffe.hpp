@@ -23,7 +23,7 @@ class DeepMAR {
  private:
   std::shared_ptr<caffe::Net<float>> net;
   boost::shared_ptr<caffe::Blob<float>> output_blob;
-  float *input_data;
+  caffe::Blob<float> *input_blob;
   const int kInputHeight = 227;
   const int kInputWidth = 227;
  public:

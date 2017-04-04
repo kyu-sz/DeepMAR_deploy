@@ -51,7 +51,7 @@ int DeepMAR::initialize(const char *proto_path,
     fflush(stdout), fflush(stderr);
     Caffe::set_mode(Caffe::CPU);
   } else if (gpu_index >= 0) {
-    fprintf(stdout, "Using GPU with device ID %d\n", gpu_index);
+    fprintf(stdout, "Using GPU with device ID %d.\n", gpu_index);
     fflush(stdout), fflush(stderr);
     Caffe::SetDevice(gpu_index);
     Caffe::set_mode(Caffe::GPU);
@@ -59,16 +59,17 @@ int DeepMAR::initialize(const char *proto_path,
   fflush(stdout), fflush(stderr);
 
   // Load the network.
-  fprintf(stdout, "Loading protocol from %s.\n", proto_path);
+  fprintf(stdout, "Loading protocol from %s...\n", proto_path);
   fflush(stdout), fflush(stderr);
   net.reset(new Net<float>(proto_path, TEST));
-  fprintf(stdout, "Loading caffemodel from %s.\n", model_path);
+  fprintf(stdout, "Loading caffemodel from %s...\n", model_path);
   fflush(stdout), fflush(stderr);
   net->CopyTrainedLayersFrom(model_path);
 
-  Blob<float> *input_blob = net->input_blobs()[0];
+  fprintf(stdout, "Managing I/O blobs...");
+  fflush(stdout), fflush(stderr);
+  input_blob = net->input_blobs()[0];
   input_blob->Reshape(1, 3, kInputHeight, kInputWidth);
-  input_data = input_blob->mutable_cpu_data();
   output_blob = net->blob_by_name("fc8");
 
   fflush(stdout), fflush(stderr);
@@ -80,7 +81,7 @@ const float* DeepMAR::recognize(const float *input) {
   assert(input != NULL);
 
   // Put the input into input blob.
-  memcpy(input_data, input, sizeof(float) * kInputHeight * kInputWidth * 3);
+  memcpy(input_blob->mutable_cpu_data(), input, sizeof(float) * kInputHeight * kInputWidth * 3);
 
   net->Forward();
 
