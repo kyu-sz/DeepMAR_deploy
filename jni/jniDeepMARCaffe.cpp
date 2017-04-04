@@ -15,9 +15,11 @@ using namespace cripac;
 JNIEXPORT jlong JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_initialize
     (JNIEnv *env, jobject self, jint gpu_id, jstring pb_path, jstring model_path) {
   DeepMAR *deepMAR = new DeepMAR();
-  deepMAR->initialize(env->GetStringUTFChars(pb_path, nullptr),
-                      env->GetStringUTFChars(model_path, nullptr),
-                      gpu_id);
+  const char* c_pb_path = env->GetStringUTFChars(pb_path, nullptr);
+  const char* c_model_path = env->GetStringUTFChars(model_path, nullptr);
+  deepMAR->initialize(c_pb_path, c_model_path, gpu_id);
+  env->ReleaseStringUTFChars(pb_path, c_pb_path);
+  env->ReleaseStringUTFChars(model_path, c_model_path);
   return (jlong) deepMAR;
 }
 
