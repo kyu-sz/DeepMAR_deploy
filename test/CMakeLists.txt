@@ -1,4 +1,3 @@
-enable_testing()
 
 add_executable(DeepMAR_test EXCLUDE_FROM_ALL test.cpp)
 
@@ -7,7 +6,7 @@ include_directories(DeepMAR_test PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(DeepMAR_test DeepMARCaffe opencv_core opencv_highgui opencv_imgproc)
 
 set(TEST_IMG_PATH
-        ${PROJECT_SOURCE_DIR}/test/CAM01_2014-02-15_20140215161032-20140215162620_tarid0_frame218_line1.png
+        ${PROJECT_SOURCE_DIR}/DeepMAR_test/CAM01_2014-02-15_20140215161032-20140215162620_tarid0_frame218_line1.png
         CACHE PATH "Path of the input image for test.")
 
 set(TEST_PROTO_PATH

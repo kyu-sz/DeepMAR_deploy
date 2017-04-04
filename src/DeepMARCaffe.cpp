@@ -29,14 +29,14 @@ int DeepMAR::initialize(const char *proto_path,
                         int gpu_index) {
   // Check input.
   if (proto_path == nullptr) {
-    fprintf(stderr, "Error: protocol buffer path at nullptr in file %s, line %d\n",
+    fprintf(stderr, "Error: protocol buffer path is nullptr at file %s, line %d\n",
             __FILE__, __LINE__);
     fflush(stdout), fflush(stderr);
     return DEEPMAR_FILE_NOT_FOUND;
   }
   // model_path input.
   if (model_path == nullptr) {
-    fprintf(stderr, "Error: Caffe model path at nullptr in file %s, line %d\n",
+    fprintf(stderr, "Error: Caffe model path is nullptr at file %s, line %d\n",
             __FILE__, __LINE__);
     fflush(stdout), fflush(stderr);
     return DEEPMAR_FILE_NOT_FOUND;
