@@ -13,13 +13,23 @@ using namespace cripac;
  * Signature: (I[B[B)J
  */
 JNIEXPORT jlong JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_initialize
-    (JNIEnv *env, jobject self, jint gpu_id, jstring pb_path, jstring model_path) {
+    (JNIEnv *env, jobject self, jint gpu_id, jstring j_pb_path, jstring j_model_path) {
   DeepMAR *deepMAR = new DeepMAR();
-  const char* c_pb_path = env->GetStringUTFChars(pb_path, nullptr);
-  const char* c_model_path = env->GetStringUTFChars(model_path, nullptr);
+
+  const int pb_len = env->GetStringUTFLength(j_pb_path);
+  const int model_len = env->GetStringUTFLength(j_model_path);
+  char *c_pb_path = new char[pb_len + 1];
+  char *c_model_path = new char[model_len + 1];
+  env->GetStringUTFRegion(j_pb_path, 0, pb_len, c_pb_path);
+  env->GetStringUTFRegion(j_model_path, 0, model_len, c_model_path);
+  c_pb_path[pb_len] = '\0';
+  c_model_path[model_len] = '\0';
+
   deepMAR->initialize(c_pb_path, c_model_path, gpu_id);
-  env->ReleaseStringUTFChars(pb_path, c_pb_path);
-  env->ReleaseStringUTFChars(model_path, c_model_path);
+
+  delete[](c_model_path);
+  delete[](c_pb_path);
+
   return (jlong) deepMAR;
 }
 
