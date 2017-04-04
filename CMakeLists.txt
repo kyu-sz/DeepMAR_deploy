@@ -4,9 +4,9 @@ project(DeepMAR_deploy)
 enable_testing()
 
 option(test OFF)
-set(CPU_ONLY $ENV{CPU_ONLY} CACHE OPTION "Whether to use CPU only.")
+set(CPU_ONLY $ENV{CPU_ONLY} OPTION "Whether to use CPU only.")
 set(CAFFE_HOME $ENV{CAFFE_HOME} CACHE PATH "Home directory of Caffe.")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
 set(JAVA_HOME $ENV{JAVA_HOME} CACHE PATH "Home directory of Java Divelooment Toolkit (JDK).")
 
 add_subdirectory(src lib)

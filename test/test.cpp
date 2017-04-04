@@ -68,10 +68,10 @@ int main(int argc, char **argv) {
   for (int i = 0; i < INPUT_SIZE * INPUT_SIZE * 3; ++i)
     input[i] = (input[i] - 128) / 256.f;
 
-  float fc8[1024];
+  const float* fc8;
 
   double start = omp_get_wtime();
-  for (int i = 0; i < 100; ++i) recognizer->recognize(input, fc8);
+  for (int i = 0; i < 100; ++i) fc8 = recognizer->recognize(input);
   double end = omp_get_wtime();
 
   for (int i = 0; i < 1024; ++i)

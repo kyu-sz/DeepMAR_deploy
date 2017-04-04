@@ -8,10 +8,13 @@
 #define _ATTRIBUTES_RECOGNIZER_H_
 
 #include <memory>
+#include <boost/shared_ptr.hpp>
 
 namespace caffe {
 template<typename Dtype>
 class Net;
+template<typename Dtype>
+class Blob;
 }
 
 namespace cripac {
@@ -19,10 +22,13 @@ namespace cripac {
 class DeepMAR {
  private:
   std::shared_ptr<caffe::Net<float>> net;
+  boost::shared_ptr<caffe::Blob<float>> output_blob;
+  float *input_data;
+  const int kInputHeight = 227;
+  const int kInputWidth = 227;
  public:
   static const int DEEPMAR_OK = 0;
   static const int DEEPMAR_FILE_NOT_FOUND = -1;
-  static const int DEEPMAR_EMPTY_INPUT = -2;
 
   DeepMAR(void) {}
   ~DeepMAR(void) {}
@@ -40,13 +46,9 @@ class DeepMAR {
 
   /**
    *  \param[IN]  data: 227x227x3 input
-   *  \param[IN]  proto_filename
-   *  \param[IN]  weights_filename
-   *  \param[IN]  gpu_index: -1 for cpu only
-   *  \param[OUT] fc8
-   *  \return error code: 0 for success; <0 for fail.
+   *  \return pointer to fc8 CPU data (do not free this pointer!)
    */
-  int recognize(const float *data, float *fc8);
+  const float * recognize(const float *data);
 
 };
 
