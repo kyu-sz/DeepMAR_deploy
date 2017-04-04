@@ -13,10 +13,10 @@ using namespace cripac;
  * Signature: (I[B[B)J
  */
 JNIEXPORT jlong JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_initialize
-    (JNIEnv *env, jobject self, jint gpu_id, jbyteArray pb_path, jbyteArray model_path) {
+    (JNIEnv *env, jobject self, jint gpu_id, jstring pb_path, jstring model_path) {
   DeepMAR *deepMAR = new DeepMAR();
-  deepMAR->initialize((const char *) env->GetByteArrayElements(pb_path, nullptr),
-                      (const char *) env->GetByteArrayElements(model_path, nullptr),
+  deepMAR->initialize(env->GetStringUTFChars(pb_path, nullptr),
+                      env->GetStringUTFChars(model_path, nullptr),
                       gpu_id);
   return (jlong) deepMAR;
 }

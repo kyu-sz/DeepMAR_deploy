@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative
  * Method:    initialize
- * Signature: (I[B[B)J
+ * Signature: (ILjava/lang/String;Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_initialize
-    (JNIEnv *, jobject, jint, jbyteArray, jbyteArray);
+  (JNIEnv *, jobject, jint, jstring, jstring);
 
 /*
  * Class:     org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative
@@ -21,7 +21,7 @@ JNIEXPORT jlong JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNat
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_free
-    (JNIEnv *, jobject, jlong);
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative
@@ -29,7 +29,7 @@ JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNati
  * Signature: (J[F[F)V
  */
 JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_recognize
-    (JNIEnv *, jobject, jlong, jfloatArray, jfloatArray);
+  (JNIEnv *, jobject, jlong, jfloatArray, jfloatArray);
 
 #ifdef __cplusplus
 }
