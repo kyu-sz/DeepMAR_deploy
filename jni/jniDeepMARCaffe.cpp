@@ -39,8 +39,9 @@ JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNati
  * Signature: (J[F[F)V
  */
 JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_recognize
-    (JNIEnv *env, jobject self, jlong net, jfloatArray input, jfloatArray output) {
+    (JNIEnv *env, jobject self, jlong net, jfloatArray j_input, jfloatArray output) {
   DeepMAR* deepMAR = (DeepMAR *) net;
-  env->SetFloatArrayRegion(output, 0, env->GetArrayLength(output),
-                           deepMAR->recognize(env->GetFloatArrayElements(input, nullptr)));
+  float* c_input = env->GetFloatArrayElements(j_input, nullptr);
+  env->SetFloatArrayRegion(output, 0, env->GetArrayLength(output), deepMAR->recognize(c_input));
+  env->ReleaseFloatArrayElements(j_input, c_input, 0);
 }
