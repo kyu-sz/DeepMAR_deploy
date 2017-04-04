@@ -6,6 +6,7 @@
 #include <getopt.h>
 #include <opencv2/opencv.hpp>
 #include <DeepMARCaffe.hpp>
+#include <omp.h>
 
 using namespace cripac;
 using namespace std;
@@ -68,10 +69,16 @@ int main(int argc, char **argv) {
     input[i] = (input[i] - 128) / 256.f;
 
   float fc8[1024];
-  recognizer->recognize(input, fc8);
+
+  double start = omp_get_wtime();
+  for (int i = 0; i < 100; ++i) recognizer->recognize(input, fc8);
+  double end = omp_get_wtime();
+
   for (int i = 0; i < 1024; ++i)
     cout << fc8[i] << ' ';
   cout << endl;
+
+  cout << (end - start) << "ms per round." << endl;
 
   return 0;
 }
