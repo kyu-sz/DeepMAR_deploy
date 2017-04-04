@@ -3,6 +3,7 @@ project(DeepMAR_deploy)
 
 enable_testing()
 
+option(test OFF)
 set(CPU_ONLY 1 CACHE OPTION "Whether to use CPU only.")
 set(CAFFE_HOME $ENV{CAFFE_HOME} CACHE PATH "Home directory of Caffe.")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
