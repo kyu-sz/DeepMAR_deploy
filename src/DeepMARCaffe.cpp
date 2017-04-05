@@ -33,14 +33,14 @@ int DeepMAR::initialize(const char *proto_path,
     fprintf(stderr, "Error: protocol buffer path is nullptr at file %s, line %d\n",
             __FILE__, __LINE__);
     fflush(stdout), fflush(stderr);
-    return DEEPMAR_FILE_NOT_FOUND;
+    return DeepMAR_ILLEGAL_ARG;
   }
   // model_path input.
   if (model_path == nullptr) {
     fprintf(stderr, "Error: Caffe model path is nullptr at file %s, line %d\n",
             __FILE__, __LINE__);
     fflush(stdout), fflush(stderr);
-    return DEEPMAR_FILE_NOT_FOUND;
+    return DeepMAR_ILLEGAL_ARG;
   }
 
   const int kCPUOnly = -1;
@@ -68,6 +68,11 @@ int DeepMAR::initialize(const char *proto_path,
 
   fprintf(stdout, "Managing I/O blobs...");
   fflush(stdout), fflush(stderr);
+  vector<Blob<float> *> input_blobs = net->input_blobs();
+  if (input_blobs.size() == 0) {
+    fflush(stdout), fflush(stderr);
+    return DeepMAR_NO_INPUT_BLOB;
+  }
   input_blob = net->input_blobs()[0];
   input_blob->Reshape(1, 3, kInputHeight, kInputWidth);
   output_blob = net->blob_by_name("fc8");

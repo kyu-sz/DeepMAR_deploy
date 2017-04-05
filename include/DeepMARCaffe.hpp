@@ -27,8 +27,11 @@ class DeepMAR {
   const int kInputHeight = 227;
   const int kInputWidth = 227;
  public:
-  static const int DEEPMAR_OK = 0;
-  static const int DEEPMAR_FILE_NOT_FOUND = -1;
+  enum DeepMARStatus {
+    DEEPMAR_OK = 0,
+    DeepMAR_ILLEGAL_ARG = -1,
+    DeepMAR_NO_INPUT_BLOB = -2,
+  };
 
   DeepMAR(void) {}
   ~DeepMAR(void) {}

@@ -25,7 +25,20 @@ JNIEXPORT jlong JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNat
   c_pb_path[pb_len] = '\0';
   c_model_path[model_len] = '\0';
 
-  deepMAR->initialize(c_pb_path, c_model_path, gpu_id);
+  assert(c_pb_path != nullptr);
+  assert(c_model_path != nullptr);
+  assert(pb_len > 0);
+  assert(model_len > 0);
+  int ret = deepMAR->initialize(c_pb_path, c_model_path, gpu_id);
+  if (ret != DeepMAR::DEEPMAR_OK) {
+    static const char *className = "java/lang/RuntimeException";
+    jclass exClass = env->FindClass(className);
+    assert(exClass != nullptr);
+    switch (ret) {
+      case DeepMAR::DeepMAR_NO_INPUT_BLOB:return env->ThrowNew(exClass, "No input blob found!");
+      default:break;
+    }
+  }
 
   delete[](c_model_path);
   delete[](c_pb_path);
@@ -50,8 +63,8 @@ JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNati
  */
 JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_recognize
     (JNIEnv *env, jobject self, jlong net, jfloatArray j_input, jfloatArray output) {
-  DeepMAR* deepMAR = (DeepMAR *) net;
-  float* c_input = env->GetFloatArrayElements(j_input, nullptr);
+  DeepMAR *deepMAR = (DeepMAR *) net;
+  float *c_input = env->GetFloatArrayElements(j_input, nullptr);
   env->SetFloatArrayRegion(output, 0, env->GetArrayLength(output), deepMAR->recognize(c_input));
   env->ReleaseFloatArrayElements(j_input, c_input, 0);
 }
