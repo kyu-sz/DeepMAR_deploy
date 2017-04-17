@@ -24,14 +24,18 @@ class DeepMAR {
   std::shared_ptr<caffe::Net<float>> net;
   boost::shared_ptr<caffe::Blob<float>> output_blob;
   caffe::Blob<float> *input_blob;
-  const int kInputHeight = 227;
-  const int kInputWidth = 227;
+  const static int kInputHeight = 227;
+  const static int kInputWidth = 227;
+
+  int currentBatchSize = 1;
  public:
   enum DeepMARStatus {
     DEEPMAR_OK = 0,
-    DeepMAR_ILLEGAL_ARG = -1,
-    DeepMAR_NO_INPUT_BLOB = -2,
+    DEEPMAR_ILLEGAL_ARG = -1,
+    DEEPMAR_NO_INPUT_BLOB = -2,
   };
+
+  const static int FC8_LEN = 1000;
 
   DeepMAR(void) {}
   ~DeepMAR(void) {}
@@ -48,10 +52,19 @@ class DeepMAR {
                  int gpu_index);
 
   /**
-   *  \param[IN]  data: 227x227x3 input
+   * Recognize attributes from a single image.
+   *  \param[IN]  data: 227 x 227 x 3 input
    *  \return pointer to fc8 CPU data (do not free this pointer!)
    */
   const float * recognize(const float *data);
+
+  /**
+   * Recognize attributes from an image batch.
+   *  \param[IN]  numImages: number of images in the batch
+   *  \param[IN]  data: numImages x 227 x 227 x 3 input
+   *  \return pointer to fc8 CPU data (do not free this pointer!)
+   */
+  const float *recognize(int numImages, float *data[]);
 
 };
 

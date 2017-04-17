@@ -35,7 +35,7 @@ JNIEXPORT jlong JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNat
     jclass exClass = env->FindClass(className);
     assert(exClass != nullptr);
     switch (ret) {
-      case DeepMAR::DeepMAR_NO_INPUT_BLOB:return env->ThrowNew(exClass, "No input blob found!");
+      case DeepMAR::DEEPMAR_NO_INPUT_BLOB:return env->ThrowNew(exClass, "No input blob found!");
       default:break;
     }
   }
@@ -61,10 +61,31 @@ JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNati
  * Method:    recognize
  * Signature: (J[F[F)V
  */
-JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_recognize
+JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_recognize__J_3F_3F
     (JNIEnv *env, jobject self, jlong net, jfloatArray j_input, jfloatArray output) {
   DeepMAR *deepMAR = (DeepMAR *) net;
   float *c_input = env->GetFloatArrayElements(j_input, nullptr);
   env->SetFloatArrayRegion(output, 0, env->GetArrayLength(output), deepMAR->recognize(c_input));
   env->ReleaseFloatArrayElements(j_input, c_input, 0);
+}
+
+JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffeNative_recognize__J_3_3F_3_3F
+    (JNIEnv *env, jobject self, jlong net, jobjectArray j_input, jobjectArray output) {
+  DeepMAR *deepMAR = (DeepMAR *) net;
+
+  int num_images = env->GetArrayLength(j_input);
+  float **inputs = new float *[num_images];
+  for (int i = 0; i < num_images; ++i)
+    inputs[i] = env->GetFloatArrayElements((jfloatArray) env->GetObjectArrayElement(j_input, i), nullptr);
+
+  const float *fc8 = deepMAR->recognize(num_images, inputs);
+  for (int i = 0; i < num_images; ++i) {
+    jfloatArray slice = (jfloatArray) env->GetObjectArrayElement(output, i);
+    env->SetFloatArrayRegion(slice, 0, env->GetArrayLength(slice), fc8);
+    fc8 += DeepMAR::FC8_LEN;
+  }
+
+  for (int i = 0; i < num_images; ++i)
+    env->ReleaseFloatArrayElements((jfloatArray) env->GetObjectArrayElement(j_input, i), inputs[i], 0);
+  delete[] inputs;
 }
