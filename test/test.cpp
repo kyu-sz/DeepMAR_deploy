@@ -55,6 +55,10 @@ int main(int argc, char **argv) {
   const int INPUT_SIZE = 227;
 
   Mat img = imread(img_path);
+  if (img.empty()) {
+    fprintf(stderr, "Cannot find image for test at \"%s\"", img_path);
+    return -1;
+  }
   resize(img, img, Size(INPUT_SIZE, INPUT_SIZE));
   img.convertTo(img, CV_32FC3);
 
