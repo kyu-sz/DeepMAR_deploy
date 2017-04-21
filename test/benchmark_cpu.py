@@ -3,6 +3,7 @@
 import caffe
 import numpy as np
 from cv2 import *
+import time
 
 caffe.set_mode_cpu()
 
@@ -22,7 +23,13 @@ channel_swap = (0, 3, 1, 2)
 blob = blob.transpose(channel_swap)
 
 forward_kwargs = {'data': blob}
+
+start = int(round(time.time() * 1000))
 net.forward(**forward_kwargs)
+end = int(round(time.time() * 1000))
+
 output = net.blobs['fc8']
 print output.data[0][0:1024]
+
+print 'Cost time: {}ms'.format(end - start)
 
