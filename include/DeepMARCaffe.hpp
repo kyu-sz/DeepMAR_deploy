@@ -28,6 +28,8 @@ class DeepMAR {
   const static int kInputWidth = 227;
 
   int currentBatchSize = 1;
+  // GPU index.
+  int gpuIndex = -1;
  public:
   enum DeepMARStatus {
     DEEPMAR_OK = 0,
