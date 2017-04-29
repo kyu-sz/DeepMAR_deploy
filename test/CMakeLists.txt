@@ -1,4 +1,4 @@
-if (test)
+if (${TEST})
     add_executable(DeepMAR_test test.cpp)
 
     include_directories(DeepMAR_test PUBLIC ${PROJECT_SOURCE_DIR}/include)

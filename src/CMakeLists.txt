@@ -3,7 +3,7 @@ add_library(DeepMARCaffe SHARED DeepMARCaffe.cpp)
 set(CMAKE_C_CFLAGS "${CMAKE_C_CFLAGS} -fPIC")
 set(CMAKE_CXX_CFLAGS "${CMAKE_CXX_CFLAGS} -fPIC")
 
-if (CPU_ONLY)
+if (${CPU_ONLY})
     message(STATUS "Compiling with CPU_ONLY!")
     add_definitions(-DCPU_ONLY)
 endif ()

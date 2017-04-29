@@ -18,6 +18,16 @@ using namespace caffe;
 
 namespace cripac {
 
+void DeepMAR::setDevice() {
+  if (gpuIndex < 0) {
+    Caffe::set_mode(Caffe::CPU);
+  } else {
+    Caffe::set_mode(Caffe::GPU);
+    Caffe::SetDevice(gpuIndex);
+    Caffe::DeviceQuery();
+  }
+}
+
 /**
  * Initialize the DeepMAR network with a protocol buffer file and a model file.
  * @param proto_path
@@ -42,24 +52,11 @@ int DeepMAR::initialize(const char *proto_path,
     fflush(stdout), fflush(stderr);
     return DEEPMAR_ILLEGAL_ARG;
   }
-  /*
-  const int kCPUOnly = -1;
 
-  // Set mode
-  if (gpu_index == kCPUOnly) {
-    fprintf(stdout, "Using CPU.\n");
-    fflush(stdout), fflush(stderr);
-    Caffe::set_mode(Caffe::CPU);
-  } else if (gpu_index >= 0) {
-    fprintf(stdout, "Using GPU with device ID %d.\n", gpu_index);
-    fflush(stdout), fflush(stderr);
-    Caffe::SetDevice(gpu_index);
-    Caffe::set_mode(Caffe::GPU);
-    Caffe::DeviceQuery();
-  }
-  */
   gpuIndex = gpu_index;
-  fprintf(stdout, "Using GPU with device ID %d.\n", gpuIndex);
+  // Set device so that the memory can be correctly allocated.
+  setDevice();
+  fprintf(stdout, "Using device %d.\n", gpuIndex);
   fflush(stdout), fflush(stderr);
   
   // Load the network.
@@ -89,20 +86,8 @@ int DeepMAR::initialize(const char *proto_path,
 const float* DeepMAR::recognize(const float *input) {
   assert(input != nullptr);
 
-  // Set mode:
-  const int kCPUOnly = -1;
-
-  if (gpuIndex == kCPUOnly) {
-    //fprintf(stdout, "Using CPU.\n");
-    //fflush(stdout), fflush(stderr);
-    Caffe::set_mode(Caffe::CPU);
-  } else if (gpuIndex >= 0) {
-    //fprintf(stdout, "Using GPU with device ID %d.\n", gpu_index);
-    //fflush(stdout), fflush(stderr);
-    Caffe::SetDevice(gpuIndex);
-    Caffe::set_mode(Caffe::GPU);
-    Caffe::DeviceQuery();
-  }
+  // In case this instance is used in another thread.
+  setDevice();
 
   // Put the input into input blob.
   if (currentBatchSize != 1)
@@ -116,21 +101,9 @@ const float* DeepMAR::recognize(const float *input) {
 
 const float *DeepMAR::recognize(int numImages, float *data[]) {
   assert(data != nullptr);
-  
-  // Set mode:
-  const int kCPUOnly = -1;
 
-  if (gpuIndex == kCPUOnly) {
-    //fprintf(stdout, "Using CPU.\n");
-    //fflush(stdout), fflush(stderr);
-    Caffe::set_mode(Caffe::CPU);
-  } else if (gpuIndex >= 0) {
-    //fprintf(stdout, "Using GPU with device ID %d.\n", gpu_index);
-    //fflush(stdout), fflush(stderr);
-    Caffe::SetDevice(gpuIndex);
-    Caffe::set_mode(Caffe::GPU);
-    Caffe::DeviceQuery();
-  }
+  // In case this instance is used in another thread.
+  setDevice();
 
   if (currentBatchSize != numImages)
     input_blob->Reshape(currentBatchSize = numImages, 3, kInputHeight, kInputWidth);

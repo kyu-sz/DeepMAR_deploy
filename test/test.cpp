@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i < INPUT_SIZE * INPUT_SIZE * 3; ++i)
     input[i] = (input[i] - 128) / 256.f;
 
-  const float* fc8;
+  const float *fc8 = nullptr;
 
   double start = omp_get_wtime();
   for (int i = 0; i < 100; ++i) fc8 = recognizer->recognize(input);

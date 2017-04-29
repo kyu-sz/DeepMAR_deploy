@@ -30,6 +30,8 @@ class DeepMAR {
   int currentBatchSize = 1;
   // GPU index.
   int gpuIndex = -1;
+
+  void setDevice();
  public:
   enum DeepMARStatus {
     DEEPMAR_OK = 0,
