@@ -11,42 +11,42 @@
 #include <string>
 
 #include <DeepMARCaffe.hpp>
-#include <caffe/caffe.hpp>
+#include <caffe2/core/net.h>
+#include <caffe2/core/init.h>
+#include <caffe2/core/predictor.h>
+#include <caffe2/core/common_gpu.h>
+#include <caffe2/utils/proto_utils.h>
 
 using namespace std;
-using namespace caffe;
+using namespace caffe2;
 
 namespace cripac {
 
 void DeepMAR::setDevice() {
-  if (gpuIndex < 0) {
-    Caffe::set_mode(Caffe::CPU);
-  } else {
-    Caffe::set_mode(Caffe::GPU);
-    Caffe::SetDevice(gpuIndex);
-    Caffe::DeviceQuery();
-  }
+#ifndef CPU_ONLY
+  SetDefaultGPUID(gpuIndex);
+#endif
 }
 
 /**
  * Initialize the DeepMAR network with a protocol buffer file and a model file.
- * @param proto_path
- * @param model_path
+ * @param init_net_path
+ * @param predict_net_path
  * @param gpu_index
  * @return 0 on success; negative values on failure.
  */
-int DeepMAR::initialize(const char *proto_path,
-                        const char *model_path,
+int DeepMAR::initialize(const char *init_net_path,
+                        const char *predict_net_path,
                         int gpu_index) {
   // Check input.
-  if (proto_path == nullptr) {
+  if (init_net_path == nullptr) {
     fprintf(stderr, "Error: protocol buffer path is nullptr at file %s, line %d\n",
             __FILE__, __LINE__);
     fflush(stdout), fflush(stderr);
     return DEEPMAR_ILLEGAL_ARG;
   }
-  // model_path input.
-  if (model_path == nullptr) {
+  // predict_net_path input.
+  if (predict_net_path == nullptr) {
     fprintf(stderr, "Error: Caffe model path is nullptr at file %s, line %d\n",
             __FILE__, __LINE__);
     fflush(stdout), fflush(stderr);
@@ -60,26 +60,27 @@ int DeepMAR::initialize(const char *proto_path,
   fflush(stdout), fflush(stderr);
   
   // Load the network.
-  fprintf(stdout, "Loading protocol from %s...\n", proto_path);
+  fprintf(stdout, "Loading protocol from %s...\n", init_net_path);
   fflush(stdout), fflush(stderr);
-  net.reset(new Net<float>(proto_path, TEST));
-  fprintf(stdout, "Loading caffemodel from %s...\n", model_path);
-  fflush(stdout), fflush(stderr);
-  net->CopyTrainedLayersFrom(model_path);
+  NetDef init_net, predict_net;
+  CAFFE_ENFORCE(ReadProtoFromFile(init_net_path, &init_net));
+  CAFFE_ENFORCE(ReadProtoFromFile(predict_net_path, &predict_net));
+  VLOG(1) << "Init net: " << ProtoDebugString(init_net);
+  LOG(INFO) << "Predict net: " << ProtoDebugString(predict_net);
 
-  fprintf(stdout, "Managing I/O blobs...");
-  fflush(stdout), fflush(stderr);
-  vector<Blob<float> *> input_blobs = net->input_blobs();
-  if (input_blobs.size() == 0) {
-    fflush(stdout), fflush(stderr);
-    return DEEPMAR_NO_INPUT_BLOB;
-  }
-  input_blob = net->input_blobs()[0];
-  input_blob->Reshape(1, 3, kInputHeight, kInputWidth);
-  output_blob = net->blob_by_name("fc8");
+  // Create predictor.
+  predictor_ = make_unique<Predictor>(init_net, predict_net);
 
   fflush(stdout), fflush(stderr);
   return DEEPMAR_OK;
+}
+
+DeepMAR::DeepMAR() {
+  input_tensors_.push_back(new TensorCPU());
+}
+
+DeepMAR::~DeepMAR() {
+  delete input_tensors_[0];
 }
 
 // Fetch the data of fc8.
@@ -91,12 +92,14 @@ const float* DeepMAR::recognize(const float *input) {
 
   // Put the input into input blob.
   if (currentBatchSize != 1)
-    input_blob->Reshape(currentBatchSize = 1, 3, kInputHeight, kInputWidth);
-  memcpy(input_blob->mutable_cpu_data(), input, sizeof(float) * kInputHeight * kInputWidth * 3);
+    input_tensors_[0]->Resize(currentBatchSize = 1, 3, kInputHeight, kInputWidth);
+  memcpy(input_tensors_[0]->mutable_data<float>(), input, sizeof(float) * kInputHeight * kInputWidth * 3);
 
-  net->Forward();
+  predictor_->run(input_tensors_, &output_tensors_);
 
-  return output_blob->cpu_data();
+  auto *fc8 = predictor_->ws()->GetBlob("fc8");
+  CAFFE_ENFORCE(fc8, "Blob: fc8 does not exist");
+  return fc8->template Get<TensorCPU>().data<float>();
 }
 
 const float *DeepMAR::recognize(int numImages, float *data[]) {
@@ -106,17 +109,19 @@ const float *DeepMAR::recognize(int numImages, float *data[]) {
   setDevice();
 
   if (currentBatchSize != numImages)
-    input_blob->Reshape(currentBatchSize = numImages, 3, kInputHeight, kInputWidth);
+    input_tensors_[0]->Resize(currentBatchSize = numImages, 3, kInputHeight, kInputWidth);
 
-  float *dst = input_blob->mutable_cpu_data();
+  float *dst = input_tensors_[0]->mutable_data<float>();
   for (int i = 0; i < numImages; ++i) {
     memcpy(dst, data[i], sizeof(float) * kInputHeight * kInputWidth * 3);
     dst += kInputHeight * kInputWidth * 3;
   }
 
-  net->Forward();
+  predictor_->run(input_tensors_, &output_tensors_);
 
-  return output_blob->cpu_data();
+  auto *fc8 = predictor_->ws()->GetBlob("fc8");
+  CAFFE_ENFORCE(fc8, "Blob: fc8 does not exist");
+  return fc8->template Get<TensorCPU>().data<float>();
 }
 
 }

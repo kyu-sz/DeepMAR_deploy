@@ -10,24 +10,26 @@
 #include <memory>
 #include <boost/shared_ptr.hpp>
 
-namespace caffe {
-template<typename Dtype>
-class Net;
-template<typename Dtype>
-class Blob;
+namespace caffe2 {
+class Predictor;
+template<class T>
+class Tensor;
+class CPUContext;
 }
+
+using TensorVector = std::vector<caffe2::Tensor<caffe2::CPUContext> *>;
 
 namespace cripac {
 
 class DeepMAR {
  private:
-  std::shared_ptr<caffe::Net<float>> net;
-  boost::shared_ptr<caffe::Blob<float>> output_blob;
-  caffe::Blob<float> *input_blob;
+  std::unique_ptr<caffe2::Predictor> predictor_;
+  TensorVector output_tensors_;
+  TensorVector input_tensors_;
   const static int kInputHeight = 227;
   const static int kInputWidth = 227;
 
-  int currentBatchSize = 1;
+  int currentBatchSize = 0;
   // GPU index.
   int gpuIndex = -1;
 
@@ -41,8 +43,8 @@ class DeepMAR {
 
   const static int FC8_LEN = 1000;
 
-  DeepMAR(void) {}
-  ~DeepMAR(void) {}
+  DeepMAR();
+  ~DeepMAR();
 
   /**
    * Initialize the DeepMAR network with a protocol buffer file and a model file.

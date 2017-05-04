@@ -6,6 +6,8 @@ set(CMAKE_CXX_CFLAGS "${CMAKE_CXX_CFLAGS} -fPIC")
 if (${CPU_ONLY})
     message(STATUS "Compiling with CPU_ONLY!")
     add_definitions(-DCPU_ONLY)
+else ()
+    message(STATUS "GPU enabled!")
 endif ()
 
 execute_process(
@@ -22,7 +24,7 @@ execute_process(
 
 include_directories(DeepMARCaffe PUBLIC ${PROJECT_SOURCE_DIR}/include)
 include_directories(DeepMARCaffe PUBLIC ${JAVA_HOME}/include)
-include_directories(DeepMARCaffe PUBLIC ${CAFFE_HOME}/include)
+include_directories(DeepMARCaffe PUBLIC /usr/include/eigen3)
 
 if (MSVC)
     include_directories(DeepMARCaffe PUBLIC ${JAVA_HOME}/include/windows)
@@ -37,7 +39,12 @@ if (CUDA_HOME)
     target_link_libraries(DeepMARCaffe PUBLIC ${CUDA_HOME}/lib64)
 endif ()
 
-find_library(CAFFE_LIB caffe HINTS ${CAFFE_HOME}/.build_release/lib)
-target_link_libraries(DeepMARCaffe PUBLIC ${CAFFE_LIB})
+find_library(CAFFE2_CPU_LIB Caffe2_CPU HINTS /usr/local/lib)
+target_link_libraries(DeepMARCaffe PUBLIC ${CAFFE2_CPU_LIB})
+
+if (NOT ${CPU_ONLY})
+    find_library(CAFFE2_GPU_LIB Caffe2_GPU HINTS /usr/local/lib)
+    target_link_libraries(DeepMARCaffe PUBLIC ${CAFFE2_GPU_LIB})
+endif ()
 
 install(TARGETS DeepMARCaffe DESTINATION lib)
