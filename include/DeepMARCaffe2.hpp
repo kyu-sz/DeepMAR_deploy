@@ -48,13 +48,13 @@ class DeepMAR {
 
   /**
    * Initialize the DeepMAR network with a protocol buffer file and a model file.
-   * @param proto_filename
+   * @param init_net_path
    * @param weights_filename
    * @param gpu_index
    * @return
    */
-  int initialize(const char *proto_filename,
-                 const char *weights_filename,
+  int initialize(const char *init_net_path,
+                 const char *predict_net_path,
                  int gpu_index);
 
   /**

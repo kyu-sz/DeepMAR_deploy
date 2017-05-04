@@ -32,6 +32,6 @@ add_subdirectory(test bin)
 
 install(FILES
         ${PROJECT_SOURCE_DIR}/lib/libDeepMAR.so
-        ${PROJECT_SOURCE_DIR}/lib/jni/libDeepMARCaffeNative.so
+        ${PROJECT_SOURCE_DIR}/lib/jni/libDeepMARCaffe2Native.so
         DESTINATION
         lib)

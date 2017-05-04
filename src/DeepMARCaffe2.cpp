@@ -10,7 +10,7 @@
 #include <vector>
 #include <string>
 
-#include <DeepMARCaffe.hpp>
+#include <DeepMARCaffe2.hpp>
 #include <caffe2/core/net.h>
 #include <caffe2/core/init.h>
 #include <caffe2/core/predictor.h>
