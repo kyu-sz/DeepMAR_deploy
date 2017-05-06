@@ -36,8 +36,10 @@ cmake-build-debug/
 CMakeCache.txt
 CMakeFiles/
 Makefile
-*.cmake
 *.cbp
 bin/
 lib/
 Testing/
+
+# Building folder
+[Rr]elease/
