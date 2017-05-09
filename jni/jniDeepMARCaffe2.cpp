@@ -4,6 +4,7 @@
 
 #include <DeepMARCaffe2.hpp>
 #include <jniDeepMARCaffe2.h>
+#include <cassert>
 
 using namespace cripac;
 

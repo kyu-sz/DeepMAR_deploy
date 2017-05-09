@@ -1,5 +1,5 @@
 
-/** @file  DeepMAR.h
+/** @file  DeepMARCaffe2.h
  *  @brief interface for pedestrian attribute recognition using DeepMAR.
  *  @date  2017/03/27
  */
@@ -8,7 +8,7 @@
 #define _ATTRIBUTES_RECOGNIZER_H_
 
 #include <memory>
-#include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace caffe2 {
 class Predictor;

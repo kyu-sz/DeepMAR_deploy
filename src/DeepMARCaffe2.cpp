@@ -11,22 +11,14 @@
 #include <string>
 
 #include <DeepMARCaffe2.hpp>
-#include <caffe2/core/net.h>
 #include <caffe2/core/init.h>
 #include <caffe2/core/predictor.h>
-#include <caffe2/core/common_gpu.h>
 #include <caffe2/utils/proto_utils.h>
 
 using namespace std;
 using namespace caffe2;
 
 namespace cripac {
-
-void DeepMAR::setDevice() {
-#ifndef CPU_ONLY
-  SetDefaultGPUID(gpuIndex);
-#endif
-}
 
 /**
  * Initialize the DeepMAR network with a protocol buffer file and a model file.

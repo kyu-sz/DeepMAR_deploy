@@ -1,4 +1,4 @@
-add_library(DeepMARCaffe SHARED DeepMARCaffe2.cpp)
+add_library(DeepMARCaffe SHARED DeepMARCaffe2.cpp DeepMARCaffe2Utils.cpp)
 
 set(CMAKE_C_CFLAGS "${CMAKE_C_CFLAGS} -fPIC")
 set(CMAKE_CXX_CFLAGS "${CMAKE_CXX_CFLAGS} -fPIC")
