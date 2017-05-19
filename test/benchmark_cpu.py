@@ -7,8 +7,8 @@ import time
 
 caffe.set_mode_cpu()
 
-net = caffe.Net('../../../../models/DeepMARCaffe/DeepMAR.prototxt',
-                '../../../../models/DeepMARCaffe/DeepMAR.caffemodel',
+net = caffe.Net('../../../../models/DeepMARCaffe2/DeepMAR.prototxt',
+                '../../../../models/DeepMARCaffe2/DeepMAR.caffemodel',
                 caffe.TEST)
 
 img = imread('CAM01_2014-02-15_20140215161032-20140215162620_tarid0_frame218_line1.png')

@@ -10,7 +10,7 @@ enable_testing()
 
 set(CPU_ONLY $ENV{CPU_ONLY} CACHE OPTION "Whether to use CPU only")
 
-set(CAFFE_HOME $ENV{CAFFE_HOME} CACHE PATH "Home directory of Caffe.")
+set(CAFFE2_INSTALL_HOME $ENV{CAFFE2_INSTALL_HOME} CACHE PATH "Installation directory of Caffe2.")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
 set(JAVA_HOME $ENV{JAVA_HOME} CACHE PATH "Home directory of Java Divelooment Toolkit (JDK).")
 
