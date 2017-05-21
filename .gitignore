@@ -40,6 +40,7 @@ Makefile
 bin/
 lib/
 Testing/
+/*.cmake
 
 # Building folder
 [Rr]elease/
