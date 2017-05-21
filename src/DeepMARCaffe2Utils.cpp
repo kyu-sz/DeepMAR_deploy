@@ -12,7 +12,9 @@
 namespace cripac {
 
 void DeepMAR::setDevice() {
+  printf("DeepMAR is compiled with CPU only.\n");
 #ifndef CPU_ONLY
+  printf("Using GPU %d!\n", gpu_index_);
   caffe2::SetDefaultGPUID(gpu_index_);
 #endif
 }

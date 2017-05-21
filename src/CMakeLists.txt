@@ -31,7 +31,6 @@ endif ()
 find_library(CAFFE2_CPU_LIB Caffe2_CPU HINTS ${CAFFE2_INSTALL_HOME}/lib)
 target_link_libraries(DeepMARCaffe2 PUBLIC ${CAFFE2_CPU_LIB})
 
-message(STATUS ${CPU_ONLY})
 if (NOT ${CPU_ONLY})
     find_library(CAFFE2_GPU_LIB Caffe2_GPU HINTS ${CAFFE2_INSTALL_HOME}/lib)
     find_library(NCCL_LIB nccl HINTS ${CAFFE2_INSTALL_HOME}/lib)

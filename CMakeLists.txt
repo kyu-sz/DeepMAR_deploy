@@ -30,10 +30,7 @@ include(cmake/Summary.cmake)
 include(cmake/Dependencies.cmake)
 
 add_subdirectory(src lib)
-
 add_subdirectory(jni lib/jni)
-
-set(TEST_IMG_PATH CACHE FILEPATH "File path of image for test.")
 add_subdirectory(test bin)
 
 install(FILES
