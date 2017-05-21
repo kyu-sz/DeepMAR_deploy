@@ -28,7 +28,7 @@ if (CUDA_HOME)
     target_link_libraries(DeepMARCaffe2 PUBLIC ${CUDA_HOME}/lib64)
 endif ()
 
-find_library(CAFFE2_CPU_LIB Caffe2_CPU HINTS /usr/local/lib)
+find_library(CAFFE2_CPU_LIB Caffe2_CPU HINTS ${CAFFE2_INSTALL_HOME}/lib)
 target_link_libraries(DeepMARCaffe2 PUBLIC ${CAFFE2_CPU_LIB})
 
 if (NOT ${CPU_ONLY})
