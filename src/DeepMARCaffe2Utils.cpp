@@ -13,7 +13,7 @@ namespace cripac {
 
 void DeepMAR::setDevice() {
 #ifndef CPU_ONLY
-  SetDefaultGPUID(gpuIndex);
+  caffe2::SetDefaultGPUID(gpu_index_);
 #endif
 }
 

@@ -45,10 +45,10 @@ int DeepMAR::initialize(const char *init_net_path,
     return DEEPMAR_ILLEGAL_ARG;
   }
 
-  gpuIndex = gpu_index;
+  gpu_index_ = gpu_index;
   // Set device so that the memory can be correctly allocated.
   setDevice();
-  fprintf(stdout, "Using device %d.\n", gpuIndex);
+  fprintf(stdout, "Using device %d.\n", gpu_index_);
   fflush(stdout), fflush(stderr);
   
   // Load the network.
@@ -83,8 +83,8 @@ const float* DeepMAR::recognize(const float *input) {
   setDevice();
 
   // Put the input into input blob.
-  if (currentBatchSize != 1)
-    input_tensors_[0]->Resize(currentBatchSize = 1, 3, kInputHeight, kInputWidth);
+  if (current_batch_size_ != 1)
+    input_tensors_[0]->Resize(current_batch_size_ = 1, 3, kInputHeight, kInputWidth);
   memcpy(input_tensors_[0]->mutable_data<float>(), input, sizeof(float) * kInputHeight * kInputWidth * 3);
 
   predictor_->run(input_tensors_, &output_tensors_);
@@ -100,8 +100,8 @@ const float *DeepMAR::recognize(int numImages, float *data[]) {
   // In case this instance is used in another thread.
   setDevice();
 
-  if (currentBatchSize != numImages)
-    input_tensors_[0]->Resize(currentBatchSize = numImages, 3, kInputHeight, kInputWidth);
+  if (current_batch_size_ != numImages)
+    input_tensors_[0]->Resize(current_batch_size_ = numImages, 3, kInputHeight, kInputWidth);
 
   float *dst = input_tensors_[0]->mutable_data<float>();
   for (int i = 0; i < numImages; ++i) {

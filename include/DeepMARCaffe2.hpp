@@ -29,9 +29,9 @@ class DeepMAR {
   const static int kInputHeight = 227;
   const static int kInputWidth = 227;
 
-  int currentBatchSize = 0;
+  int current_batch_size_ = 0;
   // GPU index.
-  int gpuIndex = -1;
+  int gpu_index_ = -1;
 
   void setDevice();
  public:
