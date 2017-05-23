@@ -44,12 +44,6 @@ int DeepMAR::initialize(const char *init_net_path,
     fflush(stdout), fflush(stderr);
     return DEEPMAR_ILLEGAL_ARG;
   }
-
-  gpu_index_ = gpu_index;
-  // Set device so that the memory can be correctly allocated.
-  setDevice();
-  fprintf(stdout, "Using device %d.\n", gpu_index_);
-  fflush(stdout), fflush(stderr);
   
   // Load the network.
   fprintf(stdout, "Loading protocol from %s...\n", init_net_path);
@@ -59,6 +53,22 @@ int DeepMAR::initialize(const char *init_net_path,
   CAFFE_ENFORCE(ReadProtoFromFile(predict_net_path, &predict_net));
   VLOG(1) << "Init net: " << ProtoDebugString(init_net);
   LOG(INFO) << "Predict net: " << ProtoDebugString(predict_net);
+
+
+  // Set device.
+  DeviceOption dev_opt;
+  if (gpu_index < 0) {
+    fprintf(stdout, "Using CPU.\n");
+    fflush(stdout);
+    dev_opt.set_device_type(caffe2::CPU);
+  } else {
+    fprintf(stdout, "Using device %d.\n", gpu_index);
+    fflush(stdout);
+    dev_opt.set_device_type(caffe2::CUDA);
+    dev_opt.set_cuda_gpu_id(gpu_index);
+  }
+  *init_net.mutable_device_option() = dev_opt;
+  *predict_net.mutable_device_option() = dev_opt;
 
   // Create predictor.
   predictor_ = make_unique<Predictor>(init_net, predict_net);
@@ -79,9 +89,6 @@ DeepMAR::~DeepMAR() {
 const float* DeepMAR::recognize(const float *input) {
   assert(input != nullptr);
 
-  // In case this instance is used in another thread.
-  setDevice();
-
   // Put the input into input blob.
   if (current_batch_size_ != 1)
     input_tensors_[0]->Resize(current_batch_size_ = 1, 3, kInputHeight, kInputWidth);
@@ -96,9 +103,6 @@ const float* DeepMAR::recognize(const float *input) {
 
 const float *DeepMAR::recognize(int numImages, float *data[]) {
   assert(data != nullptr);
-
-  // In case this instance is used in another thread.
-  setDevice();
 
   if (current_batch_size_ != numImages)
     input_tensors_[0]->Resize(current_batch_size_ = numImages, 3, kInputHeight, kInputWidth);
