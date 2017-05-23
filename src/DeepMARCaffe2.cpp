@@ -15,6 +15,10 @@
 #include <caffe2/core/predictor.h>
 #include <caffe2/utils/proto_utils.h>
 
+#ifndef CPU_ONLY
+#include <caffe2/core/context_gpu.h>
+#endif
+
 using namespace std;
 using namespace caffe2;
 
@@ -44,7 +48,7 @@ int DeepMAR::initialize(const char *init_net_path,
     fflush(stdout), fflush(stderr);
     return DEEPMAR_ILLEGAL_ARG;
   }
-  
+
   // Load the network.
   fprintf(stdout, "Loading protocol from %s...\n", init_net_path);
   fflush(stdout), fflush(stderr);
@@ -53,7 +57,6 @@ int DeepMAR::initialize(const char *init_net_path,
   CAFFE_ENFORCE(ReadProtoFromFile(predict_net_path, &predict_net));
   VLOG(1) << "Init net: " << ProtoDebugString(init_net);
   LOG(INFO) << "Predict net: " << ProtoDebugString(predict_net);
-
 
   // Set device.
   DeviceOption dev_opt;
@@ -67,58 +70,83 @@ int DeepMAR::initialize(const char *init_net_path,
     dev_opt.set_device_type(caffe2::CUDA);
     dev_opt.set_cuda_gpu_id(gpu_index);
   }
-  *init_net.mutable_device_option() = dev_opt;
-  *predict_net.mutable_device_option() = dev_opt;
+  init_net.mutable_device_option()->CopyFrom(dev_opt);
+  predict_net.mutable_device_option()->CopyFrom(dev_opt);
+  network_name_ = predict_net.name();
 
   // Create predictor.
-  predictor_ = make_unique<Predictor>(init_net, predict_net);
+  CAFFE_ENFORCE(workspace_->RunNetOnce(init_net));
+  CAFFE_ENFORCE(workspace_->CreateNet(predict_net));
 
   fflush(stdout), fflush(stderr);
   return DEEPMAR_OK;
 }
 
 DeepMAR::DeepMAR() {
-  input_tensors_.push_back(new TensorCPU());
+  workspace_ = make_unique<Workspace>();
+
+  input_buf_ = new TensorCPU;
+#ifndef CPU_ONLY
+  output_buf_ = new TensorCPU;
+#endif
+
+  input_buf_->Resize(current_batch_size_ = 1, 3, kInputHeight, kInputWidth);
 }
 
 DeepMAR::~DeepMAR() {
-  delete input_tensors_[0];
+  delete (input_buf_);
+#ifndef CPU_ONLY
+  delete (output_buf_);
+#endif
 }
 
-// Fetch the data of fc8.
-const float* DeepMAR::recognize(const float *input) {
+const float *DeepMAR::recognize(const float *input) {
   assert(input != nullptr);
-
-  // Put the input into input blob.
-  if (current_batch_size_ != 1)
-    input_tensors_[0]->Resize(current_batch_size_ = 1, 3, kInputHeight, kInputWidth);
-  memcpy(input_tensors_[0]->mutable_data<float>(), input, sizeof(float) * kInputHeight * kInputWidth * 3);
-
-  predictor_->run(input_tensors_, &output_tensors_);
-
-  auto *fc8 = predictor_->ws()->GetBlob("fc8");
-  CAFFE_ENFORCE(fc8, "Blob: fc8 does not exist");
-  return fc8->template Get<TensorCPU>().data<float>();
+  const float *inputs[] = {input};
+  return recognize(sizeof(inputs) / sizeof(const float *), inputs);
 }
 
-const float *DeepMAR::recognize(int numImages, float *data[]) {
-  assert(data != nullptr);
+const float *DeepMAR::recognize(int numImages, const float *inputs[]) {
+  assert(inputs != nullptr);
 
-  if (current_batch_size_ != numImages)
-    input_tensors_[0]->Resize(current_batch_size_ = numImages, 3, kInputHeight, kInputWidth);
-
-  float *dst = input_tensors_[0]->mutable_data<float>();
-  for (int i = 0; i < numImages; ++i) {
-    memcpy(dst, data[i], sizeof(float) * kInputHeight * kInputWidth * 3);
-    dst += kInputHeight * kInputWidth * 3;
+  // Fill the data into the input tensor buffer.
+  if (current_batch_size_ != 1)
+    input_buf_->Resize(current_batch_size_ = numImages, 3, kInputHeight, kInputWidth);
+  float *ptr = input_buf_->mutable_data<float>();
+  for (int i = 0; i < numImages; ++i, ptr += kInputHeight * kInputWidth * 3) {
+    assert(inputs[i] != nullptr);
+    memcpy(ptr, inputs[i], sizeof(float) * kInputHeight * kInputWidth * 3);
   }
 
-  predictor_->run(input_tensors_, &output_tensors_);
+  // Copy data from the buffer to the blob in the network.
+  auto *blob = workspace_->GetBlob("data");
+  CAFFE_ENFORCE(blob, "Blob: ", "data", " does not exist");
+  if (blob->IsType<TensorCPU>())
+    blob->template GetMutable<TensorCPU>()->CopyFrom(*input_buf_);
+  else
+#ifdef CPU_ONLY
+    throw new std::logic_error("DeepMARCaffe2 is compiled with no GPU support, but the network is built on GPU!");
+#else
+    blob->template GetMutable<TensorCUDA>()->CopyFrom(*input_buf_);
+#endif
 
-  auto *fc8 = predictor_->ws()->GetBlob("fc8");
+  // Forward.
+  workspace_->RunNet(network_name_);
+
+  // Get the results.
+  auto *fc8 = workspace_->GetBlob("fc8");
   CAFFE_ENFORCE(fc8, "Blob: fc8 does not exist");
-  return fc8->template Get<TensorCPU>().data<float>();
+  if (fc8->IsType<TensorCPU>())
+    return fc8->Get<TensorCPU>().data<float>();
+  else {
+#ifdef CPU_ONLY
+    throw new std::logic_error("DeepMARCaffe2 is compiled with no GPU support, but the network is built on GPU!");
+#else
+    // Need a transfer from GPU to CPU.
+    output_buf_->CopyFrom(fc8->Get<TensorCUDA>());
+    return output_buf_->data<float>();
+#endif
+  }
 }
-
 }
 

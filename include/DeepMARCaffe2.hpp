@@ -11,23 +11,25 @@
 #include <vector>
 
 namespace caffe2 {
-class Predictor;
+class Workspace;
+class CPUContext;
 template<class T>
 class Tensor;
-class CPUContext;
+using TensorCPU = Tensor<CPUContext>;
 }
-
-using TensorVector = std::vector<caffe2::Tensor<caffe2::CPUContext> *>;
 
 namespace cripac {
 
 class DeepMAR {
  private:
-  std::unique_ptr<caffe2::Predictor> predictor_;
-  TensorVector output_tensors_;
-  TensorVector input_tensors_;
+  std::unique_ptr<caffe2::Workspace> workspace_;
   const static int kInputHeight = 227;
   const static int kInputWidth = 227;
+
+  std::string network_name_;
+
+  caffe2::TensorCPU *input_buf_;
+  caffe2::TensorCPU *output_buf_;
 
   int current_batch_size_ = 0;
  public:
@@ -66,7 +68,7 @@ class DeepMAR {
    *  \param[IN]  data: numImages x 227 x 227 x 3 input
    *  \return pointer to fc8 CPU data (do not free this pointer!)
    */
-  const float *recognize(int numImages, float *data[]);
+  const float *recognize(int numImages, const float *data[]);
 
 };
 

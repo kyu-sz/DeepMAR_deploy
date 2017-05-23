@@ -79,7 +79,7 @@ JNIEXPORT void JNICALL Java_org_cripac_isee_alg_pedestrian_attr_DeepMARCaffe2Nat
   for (int i = 0; i < num_images; ++i)
     inputs[i] = env->GetFloatArrayElements((jfloatArray) env->GetObjectArrayElement(j_input, i), nullptr);
 
-  const float *fc8 = deepMAR->recognize(num_images, inputs);
+  const float *fc8 = deepMAR->recognize(num_images, (const float **) inputs);
   for (int i = 0; i < num_images; ++i) {
     jfloatArray slice = (jfloatArray) env->GetObjectArrayElement(output, i);
     env->SetFloatArrayRegion(slice, 0, env->GetArrayLength(slice), fc8);
