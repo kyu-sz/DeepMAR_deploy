@@ -6,11 +6,12 @@
 #include <getopt.h>
 #include <opencv2/opencv.hpp>
 #include <DeepMARCaffe2.hpp>
-#include <omp.h>
+#include <chrono>
 
 using namespace cripac;
 using namespace std;
 using namespace cv;
+using namespace std::chrono;
 
 int main(int argc, char **argv) {
   int gpuID = -1;
@@ -74,15 +75,15 @@ int main(int argc, char **argv) {
 
   const float *fc8 = nullptr;
 
-  double start = omp_get_wtime();
+  milliseconds start = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
   for (int i = 0; i < 100; ++i) fc8 = recognizer->recognize(input);
-  double end = omp_get_wtime();
+  milliseconds end = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
   for (int i = 0; i < 1024; ++i)
     cout << fc8[i] << ' ';
   cout << endl;
 
-  cout << (end - start) << "ms per round." << endl;
+  cout << (end.count() - start.count()) / 100 << "ms per round." << endl;
 
   return 0;
 }
