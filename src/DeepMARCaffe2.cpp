@@ -110,7 +110,7 @@ const float *DeepMAR::recognize(int numImages, const float *inputs[]) {
   assert(inputs != nullptr);
 
   // Fill the data into the input tensor buffer.
-  if (current_batch_size_ != 1)
+  if (current_batch_size_ != numImages)
     input_buf_->Resize(current_batch_size_ = numImages, 3, kInputHeight, kInputWidth);
   float *ptr = input_buf_->mutable_data<float>();
   for (int i = 0; i < numImages; ++i, ptr += kInputHeight * kInputWidth * 3) {
