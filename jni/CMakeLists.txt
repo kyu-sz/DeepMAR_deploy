@@ -9,9 +9,9 @@ include_directories(jniDeepMARCaffe2 PUBLIC ${JAVA_HOME}/include)
 target_link_libraries(jniDeepMARCaffe2 DeepMARCaffe2 opencv_core opencv_highgui opencv_imgproc)
 
 if (MSVC)
-    include_directories(jniDeepMARCaffe2 PUBLIC ${JAVA_HOME}/include/windows)
+    target_include_directories(jniDeepMARCaffe2 PUBLIC ${JAVA_HOME}/include/windows)
 else ()
-    include_directories(jniDeepMARCaffe2 PUBLIC ${JAVA_HOME}/include/linux)
+    target_include_directories(jniDeepMARCaffe2 PUBLIC ${JAVA_HOME}/include/linux)
 endif ()
 
 install(TARGETS jniDeepMARCaffe2 DESTINATION lib)

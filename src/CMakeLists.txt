@@ -25,7 +25,7 @@ set(CUDA_HOME $ENV{CUDA_HOME})
 if (CUDA_HOME)
     message(STATUS "Using CUDA at ${CUDA_HOME}")
     target_include_directories(DeepMARCaffe2 PUBLIC ${CUDA_HOME}/include)
-    target_link_libraries(DeepMARCaffe2 PUBLIC ${CUDA_HOME}/lib64)
+    link_directories(DeepMARCaffe2 PUBLIC ${CUDA_HOME}/lib64)
 endif ()
 
 find_library(CAFFE2_CPU_LIB Caffe2_CPU HINTS ${CAFFE2_INSTALL_HOME}/lib)
